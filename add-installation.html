@@ -84,6 +84,10 @@
           <label class="form-label">سعر الشد</label>
           <input type="number" class="form-control" id="installPrice">
         </div>
+<div class="col-md-6">
+  <label class="form-label">تاريخ الشد</label>
+  <input type="date" class="form-control" id="installDate" required>
+</div>
 
         <div class="col-md-6">
           <label class="form-label">رابط صورة الوصل</label>
@@ -139,26 +143,29 @@
       const deliveryPrice = +document.getElementById("deliveryPrice").value;
       const installPrice = +document.getElementById("installPrice").value;
       const receiptUrl = document.getElementById("receiptUrl").value;
+const installDate = document.getElementById("installDate").value;
 
       const technicianRef = await db.collection("users").doc(technicianId).get();
       const technicianName = technicianRef.data().name;
 
-      await db.collection("orders").add({
-        customerName,
-        customerPhone,
-        customerAddress,
-        locationUrl,
-        technicianId,
-        technicianName,
-        lockType,
-        lockCode,
-        lockPrice,
-        deliveryPrice,
-        installPrice,
-        receiptUrl,
-        status: "جديد",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+ await db.collection("orders").add({
+  customerName,
+  customerPhone,
+  customerAddress,
+  locationUrl,
+  technicianId,
+  technicianName,
+  lockType,
+  lockCode,
+  lockPrice,
+  deliveryPrice,
+  installPrice,
+  receiptUrl,
+  installDate, // ✅ جديد
+  status: "جديد",
+  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+});
+
 
       document.getElementById("statusMsg").innerText = "✔️ تم حفظ الطلب بنجاح!";
       document.getElementById("installationForm").reset();
