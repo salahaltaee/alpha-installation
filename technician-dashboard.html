@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <!-- Firebase compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-light">
   <div class="container py-4">
@@ -17,13 +17,13 @@
     <div id="ordersContainer"></div>
   </div>
 
-  <!-- Firebase Config -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyClDmGw0rvjq5YcNkFVXjy9JYPKZlCq4Bw",
       authDomain: "alpha-installation.firebaseapp.com",
       projectId: "alpha-installation"
     };
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -44,7 +44,7 @@
             const data = doc.data();
             const id = doc.id;
 
-            const salesWhatsapp = "07700000000"; // ← عدل إلى رقم أبو المبيعات
+            const salesWhatsapp = "07700000000"; // ← عدله حسب رقم أبو المبيعات الحقيقي
             const messageToSales = `مرحبا ${salesWhatsapp} لقد أتممت عملي وهذه الصور المطلوبة`;
             const messageToCustomer = `مرحبا أستاذ ${data.customerName}، أنا الفني ${technicianName} من شركة ALPHA، إذا أمكن ترسل لي اللوكيشن ومتى مناسب لك؟`;
 
