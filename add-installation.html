@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <!-- Firebase compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-light">
   <div class="container py-4">
@@ -87,7 +87,7 @@
 
         <div class="col-md-6">
           <label class="form-label">رابط صورة الوصل</label>
-          <input type="text" class="form-control" id="receiptUrl" placeholder="مثال: رابط Google Drive أو صورة على الإنترنت" required>
+          <input type="text" class="form-control" id="receiptUrl" placeholder="رابط Google Drive أو مباشر" required>
         </div>
 
         <div class="col-12 text-end">
@@ -100,18 +100,17 @@
     <div id="statusMsg" class="text-center text-success mt-3"></div>
   </div>
 
-  <!-- Firebase Config -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyClDmGw0rvjq5YcNkFVXjy9JYPKZlCq4Bw",
       authDomain: "alpha-installation.firebaseapp.com",
-      projectId: "alpha-installation",
+      projectId: "alpha-installation"
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // تحميل الفنيين في القائمة
+    // تحميل الفنيين
     window.onload = () => {
       db.collection("users").where("role", "==", "technician").get().then(snapshot => {
         const select = document.getElementById("technicianSelect");
