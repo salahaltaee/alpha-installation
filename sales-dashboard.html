@@ -57,6 +57,11 @@
             const data = doc.data();
             const id = doc.id;
 
+            let statusText = data.status || "جديد";
+            if (statusText === "تم الإنهاء من قبل الفني") {
+              statusText = "تم إنجاز العمل";
+            }
+
             const whatsappMessage = `مرحبا أستاذ ${data.customerName}، شكرا لاختيارك ALPHA Smart Homes. كيف كانت تجربتك معنا؟ وهل لديك أي استفسارات أو ملاحظات على الفني؟ وهل لديك أي اقتراحات لتحسين العمل؟`;
 
             const row = `
@@ -64,7 +69,7 @@
                 <td>${data.customerName}</td>
                 <td>${data.technicianName}</td>
                 <td>${data.lockType}</td>
-                <td>${data.status || "قيد المعالجة"}</td>
+                <td>${statusText}</td>
                 <td>
                   <a href="order-details.html?id=${id}" class="btn btn-sm btn-primary">عرض</a>
                   <a href="edit-order.html?id=${id}" class="btn btn-sm btn-warning">تعديل</a>
