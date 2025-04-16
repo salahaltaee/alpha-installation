@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>تعديل الطلب</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <h3 class="mb-4">✏️ تعديل الطلب</h3>
+    <form id="editForm">
+      <div class="row g-3">
+
+        <input type="hidden" id="orderId">
+
+        <div class="col-md-6">
+          <label class="form-label">اسم الزبون</label>
+          <input type="text" class="form-control" id="customerName" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">رقم الزبون</label>
+          <input type="text" class="form-control" id="customerPhone" required>
+        </div>
+
+        <div class="col-md-12">
+          <label class="form-label">عنوان الزبون</label>
+          <input type="text" class="form-control" id="customerAddress" required>
+        </div>
+
+        <div class="col-md-12">
+          <label class="form-label">رابط اللوكيشن</label>
+          <input type="text" class="form-control" id="locationUrl">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">نوع القفل</label>
+          <select id="lockType" class="form-select" required>
+            <option disabled selected>اختر نوع القفل</option>
+            <option value="DL-101">DL-101</option>
+            <option value="DL-102">DL-102</option>
+            <option value="DL-103">DL-103</option>
+            <option value="DL-2101">DL-2101</option>
+            <option value="DL-102-A">DL-102-A</option>
+            <option value="DL-102-C">DL-102-C</option>
+            <option value="DL-104">DL-104</option>
+            <option value="DL-121">DL-121</option>
+            <option value="DL-122">DL-122</option>
+            <option value="DL-123">DL-123</option>
+            <option value="DL-124">DL-124</option>
+            <option value="DL-125">DL-125</option>
+            <option value="DL-131">DL-131</option>
+            <option value="DL-LOCKINV5">DL-LOCKINV5</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">رمز القفل</label>
+          <input type="text" class="form-control" id="lockCode">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">سعر القفل</label>
+          <input type="number" class="form-control" id="lockPrice">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">سعر الوصل</label>
+          <input type="number" class="form-control" id="deliveryPrice">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">سعر الشد</label>
+          <input type="number" class="form-control" id="installPrice">
+        </div>
+
+        <div class="col-md-12">
+          <label class="form-label">رابط صورة الوصل</label>
+          <input type="text" class="form-control" id="receiptUrl" required>
+        </div>
+
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-warning mt-3">💾 حفظ التعديلات</button>
+        </div>
+
+      </div>
+    </form>
+
+    <div id="statusMsg" class="text-center text-success mt-3"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyClDmGw0rvjq5YcNkFVXjy9JYPKZlCq4Bw",
+      authDomain: "alpha-installation.firebaseapp.com",
+      projectId: "alpha-installation"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("id");
+
+    document.getElementById("orderId").value = orderId;
+
+    // تحميل الطلب
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = "login-sales.html";
+        return;
+      }
+
+      const doc = await db.collection("orders").doc(orderId).get();
+      if (!doc.exists) {
+        alert("الطلب غير موجود.");
+        return;
+      }
+
+      const data = doc.data();
+      document.getElementById("customerName").value = data.customerName;
+      document.getElementById("customerPhone").value = data.customerPhone;
+      document.getElementById("customerAddress").value = data.customerAddress;
+      document.getElementById("locationUrl").value = data.locationUrl;
+      document.getElementById("lockType").value = data.lockType;
+      document.getElementById("lockCode").value = data.lockCode;
+      document.getElementById("lockPrice").value = data.lockPrice;
+      document.getElementById("deliveryPrice").value = data.deliveryPrice;
+      document.getElementById("installPrice").value = data.installPrice;
+      document.getElementById("receiptUrl").value = data.receiptUrl;
+    });
+
+    // حفظ التعديلات
+    document.getElementById("editForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const updatedData = {
+        customerName: document.getElementById("customerName").value,
+        customerPhone: document.getElementById("customerPhone").value,
+        customerAddress: document.getElementById("customerAddress").value,
+        locationUrl: document.getElementById("locationUrl").value,
+        lockType: document.getElementById("lockType").value,
+        lockCode: document.getElementById("lockCode").value,
+        lockPrice: +document.getElementById("lockPrice").value,
+        deliveryPrice: +document.getElementById("deliveryPrice").value,
+        installPrice: +document.getElementById("installPrice").value,
+        receiptUrl: document.getElementById("receiptUrl").value
+      };
+
+      await db.collection("orders").doc(orderId).update(updatedData);
+
+      document.getElementById("statusMsg").innerText = "✔️ تم حفظ التعديلات بنجاح!";
+    });
+  </script>
+</body>
+</html>
