@@ -5,10 +5,10 @@
   <title>إنشاء حساب جديد</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <!-- Firebase compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
   <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
@@ -48,12 +48,14 @@
     <div id="statusMsg" class="text-center text-success mt-3"></div>
   </div>
 
+  <!-- Firebase Config + Logic -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyClDmGw0rvjq5YcNkFVXjy9JYPKZlCq4Bw",
       authDomain: "alpha-installation.firebaseapp.com",
       projectId: "alpha-installation"
     };
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -71,7 +73,6 @@
         .then((userCredential) => {
           const user = userCredential.user;
 
-          // حفظ بيانات المستخدم في Firestore
           return db.collection("users").doc(user.uid).set({
             name,
             phone,
@@ -79,7 +80,6 @@
             role
           }).then(() => {
             document.getElementById("statusMsg").innerText = "✅ تم إنشاء الحساب بنجاح!";
-            // إعادة توجيه حسب نوع المستخدم
             if (role === "sales") {
               window.location.href = "sales-dashboard.html";
             } else {
