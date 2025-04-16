@@ -13,8 +13,24 @@
 </head>
 <body class="bg-light">
   <div class="container py-4">
-    <h3 class="mb-4">🧰 لوحة الفني</h3>
-    <div id="ordersContainer"></div>
+    <h3 class="mb-3">🧰 لوحة الفني</h3>
+    <p>رقم واتساب المبيعات: <strong class="text-primary">9647840400214</strong></p>
+
+    <div>
+      <h4>📥 الأعمال الجديدة</h4>
+      <div id="newOrders" class="mb-5"></div>
+
+      <h4>🟡 قيد العمل</h4>
+      <div id="inProgressOrders" class="mb-5"></div>
+
+      <h4>✅ الأعمال المنجزة</h4>
+      <div id="completedOrders" class="mb-5"></div>
+
+      <h5 class="text-end mt-5">
+        💰 المبلغ الكلي المستلم هذا الشهر:
+        <span id="totalMonthly" class="text-success fw-bold">0 د.ع</span>
+      </h5>
+    </div>
   </div>
 
   <script>
@@ -28,68 +44,85 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let currentUser;
+    const salesWhatsapp = "9647840400214";
+    let totalIncome = 0;
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
     auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        currentUser = user;
-        const userDoc = await db.collection("users").doc(user.uid).get();
-        const technicianName = userDoc.data().name;
-        const whatsapp = userDoc.data().whatsapp;
+      if (!user) return window.location.href = "login-technician.html";
 
-        db.collection("orders").where("technicianId", "==", user.uid).onSnapshot(snapshot => {
-          const container = document.getElementById("ordersContainer");
-          container.innerHTML = "";
+      const userDoc = await db.collection("users").doc(user.uid).get();
+      const technicianName = userDoc.data().name;
 
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            const id = doc.id;
+      db.collection("orders").where("technicianId", "==", user.uid).onSnapshot(snapshot => {
+        document.getElementById("newOrders").innerHTML = "";
+        document.getElementById("inProgressOrders").innerHTML = "";
+        document.getElementById("completedOrders").innerHTML = "";
+        totalIncome = 0;
 
-            const salesWhatsapp = "07700000000"; // ← عدله حسب رقم أبو المبيعات الحقيقي
-            const messageToSales = `مرحبا ${salesWhatsapp} لقد أتممت عملي وهذه الصور المطلوبة`;
-            const messageToCustomer = `مرحبا أستاذ ${data.customerName}، أنا الفني ${technicianName} من شركة ALPHA، إذا أمكن ترسل لي اللوكيشن ومتى مناسب لك؟`;
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const id = doc.id;
+          const createdAt = data.createdAt?.toDate();
+          const formattedDate = createdAt ? createdAt.toLocaleDateString("ar-EG") : "غير متوفر";
+          const status = data.status || "جديد";
+          const installPrice = data.installPrice || 0;
 
-            container.innerHTML += `
-              <div class="card mb-4">
-                <div class="card-body">
-                  <h5 class="card-title">${data.customerName}</h5>
-                  <p>رقم الزبون: ${data.customerPhone}</p>
-                  <p>العنوان: ${data.customerAddress}</p>
-                  <p>نوع القفل: ${data.lockType}</p>
-                  <p>رمز القفل: ${data.lockCode}</p>
+          const msgToSales = `مرحبا، لقد أتممت عملي وهذه الصور المطلوبة للطلب الخاص بـ ${data.customerName}`;
+          const msgToCustomer = `مرحبا أستاذ ${data.customerName}، أنا الفني ${technicianName} من شركة ALPHA، إذا أمكن ترسل لي اللوكيشن ومتى مناسب لك؟`;
 
-                  <button onclick="approveOrder('${id}')" class="btn btn-primary btn-sm">✅ موافقة</button>
-                  <a class="btn btn-outline-success btn-sm" target="_blank" href="https://wa.me/${salesWhatsapp}?text=${encodeURIComponent(messageToSales)}">📤 واتساب للمبيعات</a>
-                  <a class="btn btn-outline-info btn-sm" target="_blank" href="https://wa.me/${data.customerPhone}?text=${encodeURIComponent(messageToCustomer)}">📩 واتساب للزبون</a>
-                  <button onclick="enableFinish('${id}')" class="btn btn-warning btn-sm">📎 إرسال صور</button>
-                  <button id="finishBtn-${id}" class="btn btn-danger btn-sm" disabled onclick="finishWork('${id}')">✅ إتمام العمل</button>
+          const card = `
+            <div class="card mb-3 shadow-sm">
+              <div class="card-body">
+                <h5>${data.customerName}</h5>
+                <p>📍 العنوان: ${data.customerAddress}</p>
+                <p>🔐 نوع القفل: ${data.lockType}</p>
+                <p>📆 تاريخ الشد: ${formattedDate}</p>
+                <p>💸 سعر الشد: <strong>${installPrice} د.ع</strong></p>
+                <p>الحالة: <strong>${status}</strong></p>
+
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                  ${status === "جديد" ? `<button class="btn btn-sm btn-primary" onclick="approveOrder('${id}')">✅ موافقة</button>` : ""}
+                  ${status === "تمت الموافقة من الفني" ? `
+                    <button class="btn btn-sm btn-warning" onclick="markCompleted('${id}')">✅ إتمام العمل</button>
+                    <a class="btn btn-sm btn-outline-success" target="_blank" href="https://wa.me/${salesWhatsapp}?text=${encodeURIComponent(msgToSales)}">📤 واتساب للمبيعات</a>
+                  ` : ""}
+                  <a class="btn btn-sm btn-outline-info" target="_blank" href="https://wa.me/${data.customerPhone}?text=${encodeURIComponent(msgToCustomer)}">📩 واتساب للزبون</a>
                 </div>
               </div>
-            `;
-          });
+            </div>
+          `;
+
+          if (status === "جديد") {
+            document.getElementById("newOrders").innerHTML += card;
+          } else if (status === "تمت الموافقة من الفني") {
+            document.getElementById("inProgressOrders").innerHTML += card;
+          } else if (status === "تم الإنهاء من قبل الفني") {
+            const date = createdAt;
+            if (date && date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+              totalIncome += installPrice;
+            }
+            document.getElementById("completedOrders").innerHTML += card;
+          }
         });
 
-      } else {
-        window.location.href = "login-technician.html";
-      }
+        document.getElementById("totalMonthly").innerText = totalIncome.toLocaleString() + " د.ع";
+      });
     });
 
     function approveOrder(id) {
       db.collection("orders").doc(id).update({
         status: "تمت الموافقة من الفني"
       });
-      alert("تمت الموافقة على الطلب ✅");
+      alert("تمت الموافقة ✅");
     }
 
-    function enableFinish(id) {
-      document.getElementById(`finishBtn-${id}`).disabled = false;
-      alert("أرسل الصور عبر واتساب ثم اضغط على 'إتمام العمل'");
-    }
-
-    function finishWork(id) {
+    function markCompleted(id) {
       db.collection("orders").doc(id).update({
         status: "تم الإنهاء من قبل الفني"
       });
-      alert("تم إنهاء العمل بنجاح 🎉");
+      alert("تم إنهاء العمل 🎉");
     }
   </script>
 </body>
