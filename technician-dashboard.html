@@ -16,21 +16,19 @@
     <h3 class="mb-3">🧰 لوحة الفني</h3>
     <p>رقم واتساب المبيعات: <strong class="text-primary">9647840400214</strong></p>
 
-    <div>
-      <h4>📥 الأعمال الجديدة</h4>
-      <div id="newOrders" class="mb-5"></div>
+    <h4>📥 الأعمال الجديدة</h4>
+    <div id="newOrders" class="mb-5"></div>
 
-      <h4>🟡 قيد العمل</h4>
-      <div id="inProgressOrders" class="mb-5"></div>
+    <h4>🟡 قيد العمل</h4>
+    <div id="inProgressOrders" class="mb-5"></div>
 
-      <h4>✅ الأعمال المنجزة</h4>
-      <div id="completedOrders" class="mb-5"></div>
+    <h4>✅ الأعمال المنجزة</h4>
+    <div id="completedOrders" class="mb-5"></div>
 
-      <h5 class="text-end mt-5">
-        💰 المبلغ الكلي المستلم هذا الشهر:
-        <span id="totalMonthly" class="text-success fw-bold">0 د.ع</span>
-      </h5>
-    </div>
+    <h5 class="text-end mt-5">
+      💰 المبلغ الكلي المستلم هذا الشهر:
+      <span id="totalMonthly" class="text-success fw-bold">0 د.ع</span>
+    </h5>
   </div>
 
   <script>
@@ -69,7 +67,6 @@
           const status = data.status || "جديد";
           const installPrice = data.installPrice || 0;
 
-          const msgToSales = `مرحبا، لقد أتممت عملي وهذه الصور المطلوبة للطلب الخاص بـ ${data.customerName}`;
           const msgToCustomer = `مرحبا أستاذ ${data.customerName}، أنا الفني ${technicianName} من شركة ALPHA، إذا أمكن ترسل لي اللوكيشن ومتى مناسب لك؟`;
 
           const card = `
@@ -85,8 +82,8 @@
                 <div class="d-flex flex-wrap gap-2 mt-2">
                   ${status === "جديد" ? `<button class="btn btn-sm btn-primary" onclick="approveOrder('${id}')">✅ موافقة</button>` : ""}
                   ${status === "تمت الموافقة من الفني" ? `
-                    <button class="btn btn-sm btn-warning" onclick="markCompleted('${id}')">✅ إتمام العمل</button>
-                    <a class="btn btn-sm btn-outline-success" target="_blank" href="https://wa.me/${salesWhatsapp}?text=${encodeURIComponent(msgToSales)}">📤 واتساب للمبيعات</a>
+                    <button class="btn btn-sm btn-outline-success" onclick="sendWhatsAppAndEnable('${id}', '${data.customerName}')">📤 إرسال للمبيعات</button>
+                    <button id="finishBtn-${id}" class="btn btn-sm btn-danger" disabled onclick="markCompleted('${id}')">✅ إتمام العمل</button>
                   ` : ""}
                   <a class="btn btn-sm btn-outline-info" target="_blank" href="https://wa.me/${data.customerPhone}?text=${encodeURIComponent(msgToCustomer)}">📩 واتساب للزبون</a>
                 </div>
@@ -122,7 +119,22 @@
       db.collection("orders").doc(id).update({
         status: "تم الإنهاء من قبل الفني"
       });
-      alert("تم إنهاء العمل 🎉");
+      alert("🎉 تم إنهاء العمل بنجاح!");
+    }
+
+    function sendWhatsAppAndEnable(id, customerName) {
+      const msg = `اتممت عملي وهذه عمل الاستاذ ${customerName} وسأرسل الصور للعمل`;
+      const link = `https://wa.me/${salesWhatsapp}?text=${encodeURIComponent(msg)}`;
+      window.open(link, "_blank");
+
+      setTimeout(() => {
+        const btn = document.getElementById(`finishBtn-${id}`);
+        if (btn) {
+          btn.disabled = false;
+          btn.classList.remove("btn-danger");
+          btn.classList.add("btn-success");
+        }
+      }, 2000); // مهلة بسيطة بعد الإرسال
     }
   </script>
 </body>
