@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة المبيعات - ALPHA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-light">
+
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3>طلبات الشد</h3>
+      <a href="add-installation.html" class="btn btn-success">➕ إضافة طلب شد</a>
+    </div>
+
+    <div id="ordersList" class="table-responsive">
+      <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>اسم الزبون</th>
+            <th>الفني</th>
+            <th>نوع القفل</th>
+            <th>الحالة</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTable">
+          <!-- الطلبات ستُعرض هنا -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyClDmGw0rvjq5YcNkFVXjy9JYPKZlCq4Bw",
+      authDomain: "alpha-installation.firebaseapp.com",
+      projectId: "alpha-installation",
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <!-- Load Orders -->
+  <script>
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        db.collection("orders").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+          const table = document.getElementById("ordersTable");
+          table.innerHTML = "";
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const id = doc.id;
+
+            const whatsappMessage = `مرحبا أستاذ ${data.customerName}، شكرا لاختيارك ALPHA Smart Homes. كيف كانت تجربتك معنا؟ وهل لديك أي استفسارات أو ملاحظات على الفني؟ وهل لديك أي اقتراحات لتحسين العمل؟`;
+
+            const row = `
+              <tr>
+                <td>${data.customerName}</td>
+                <td>${data.technicianName}</td>
+                <td>${data.lockType}</td>
+                <td>${data.status || "قيد المعالجة"}</td>
+                <td>
+                  <a href="order-details.html?id=${id}" class="btn btn-sm btn-primary">عرض</a>
+                  <a href="edit-order.html?id=${id}" class="btn btn-sm btn-warning">تعديل</a>
+                  <a target="_blank" class="btn btn-sm btn-success" href="https://wa.me/${data.customerPhone}?text=${encodeURIComponent(whatsappMessage)}">💬 تقييم الزبون</a>
+                </td>
+              </tr>`;
+            table.innerHTML += row;
+          });
+        });
+      } else {
+        window.location.href = "login-sales.html";
+      }
+    });
+  </script>
+</body>
+</html>
